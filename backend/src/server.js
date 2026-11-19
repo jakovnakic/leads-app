@@ -1,11 +1,19 @@
 import express from 'express';
 import pool from './db/pool.js';
+import scoringConfigRoutes from './routes/scoringConfigRoutes.js';
+import notFound from './middleware/notFound.js';
+import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// General middleware
 app.use(express.json());
 
+// API routes
+app.use('/api/scoring-config', scoringConfigRoutes);
+
+// Health endpoint
 app.get('/api/health', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW() AS current_time');
@@ -25,6 +33,11 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Error handling middleware
+app.use(notFound);
+app.use(errorHandler);
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
