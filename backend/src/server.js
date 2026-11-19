@@ -3,6 +3,7 @@ import pool from './db/pool.js';
 import scoringConfigRoutes from './routes/scoringConfigRoutes.js';
 import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
+import agentRoutes from './routes/agentRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // API routes
 app.use('/api/scoring-config', scoringConfigRoutes);
+app.use('/api/agents', agentRoutes);
 
 // Health endpoint
 app.get('/api/health', async (req, res) => {
