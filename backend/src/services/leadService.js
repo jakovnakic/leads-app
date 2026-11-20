@@ -60,3 +60,44 @@ export const getLeadById = async (id) => {
 
   return result.rows[0] || null;
 };
+
+export const createLead = async (leadData) => {
+  const {
+    name,
+    phone,
+    status,
+    assigned_agent_id,
+    is_new_customer,
+    commercial_interest_option_id,
+    lead_source_option_id,
+  } = leadData;
+
+  const result = await pool.query(
+    `
+      INSERT INTO leads (
+        name,
+        phone,
+        status,
+        assigned_agent_id,
+        is_new_customer,
+        commercial_interest_option_id,
+        lead_source_option_id
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id
+    `,
+    [
+      name.trim(),
+      phone.trim(),
+      status,
+      assigned_agent_id,
+      is_new_customer,
+      commercial_interest_option_id,
+      lead_source_option_id,
+    ],
+  );
+
+  const newLeadId = result.rows[0].id;
+
+  return getLeadById(newLeadId);
+};

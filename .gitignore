@@ -30,3 +30,7 @@ dist-ssr
 
 # Backend coverage reports
 coverage/
+
+# Postman local workspace files
+.postman/
+postman/

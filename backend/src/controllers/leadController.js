@@ -1,4 +1,8 @@
-import { getAllLeads, getLeadById } from '../services/leadService.js';
+import {
+  getAllLeads,
+  getLeadById,
+  createLead,
+} from '../services/leadService.js';
 
 export const getAllLeadsController = async (req, res, next) => {
   try {
@@ -24,6 +28,16 @@ export const getLeadByIdController = async (req, res, next) => {
     }
 
     res.status(200).json(lead);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createLeadController = async (req, res, next) => {
+  try {
+    const newLead = await createLead(req.body);
+
+    res.status(201).json(newLead);
   } catch (error) {
     next(error);
   }
