@@ -51,3 +51,74 @@ export const getScoringConfig = async () => {
     leadSourceOptions: leadSourceResult.rows,
   };
 };
+
+export const updateScoringConfig = async (configData) => {
+  const {
+    new_customer_weight,
+    commercial_interest_weight,
+    lead_source_weight,
+    age_weight,
+    version,
+  } = configData;
+
+  const weights = [
+    new_customer_weight,
+    commercial_interest_weight,
+    lead_source_weight,
+    age_weight,
+  ];
+
+  if (!Number.isInteger(version) || version < 1) {
+    const error = new Error(
+      'A valid scoring configuration version is required',
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (
+    !weights.every(
+      (weight) => Number.isInteger(weight) && weight >= 0 && weight <= 100,
+    )
+  ) {
+    const error = new Error('All weights must be integers between 0 and 100');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const totalWeight = weights.reduce((total, weight) => total + weight, 0);
+
+  if (totalWeight !== 100) {
+    const error = new Error('Scoring weights must add up to exactly 100');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const result = await pool.query(
+    `
+      UPDATE scoring_config
+      SET
+        new_customer_weight = $1,
+        commercial_interest_weight = $2,
+        lead_source_weight = $3,
+        age_weight = $4,
+        version = version + 1,
+        updated_at = NOW()
+      WHERE version = $5
+      RETURNING *
+    `,
+    [
+      new_customer_weight,
+      commercial_interest_weight,
+      lead_source_weight,
+      age_weight,
+      version,
+    ],
+  );
+
+  if (result.rowCount === 0) {
+    return { conflict: true };
+  }
+
+  return getScoringConfig();
+};

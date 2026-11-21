@@ -286,3 +286,70 @@ export const createLead = async (leadData) => {
 
   return getLeadById(newLeadId);
 };
+
+export const updateLead = async (id, leadData) => {
+  const { version, ...fields } = leadData;
+
+  const allowedFields = {
+    name: 'name',
+    phone: 'phone',
+    status: 'status',
+    assigned_agent_id: 'assigned_agent_id',
+    is_new_customer: 'is_new_customer',
+    commercial_interest_option_id: 'commercial_interest_option_id',
+    lead_source_option_id: 'lead_source_option_id',
+  };
+
+  const entries = Object.entries(fields);
+
+  const values = [];
+  const setClauses = [];
+
+  for (const [field, value] of entries) {
+    const column = allowedFields[field];
+
+    if (!column) {
+      const error = new Error(`Field '${field}' cannot be updated`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    values.push(field === 'name' || field === 'phone' ? value.trim() : value);
+
+    setClauses.push(`${column} = $${values.length}`);
+  }
+
+  values.push(id);
+  const idParameter = values.length;
+
+  values.push(version);
+  const versionParameter = values.length;
+
+  const query = `
+    UPDATE leads
+    SET
+      ${setClauses.join(', ')},
+      updated_at = NOW(),
+      version = version + 1
+    WHERE id = $${idParameter}
+      AND version = $${versionParameter}
+    RETURNING id
+  `;
+
+  const result = await pool.query(query, values);
+
+  if (result.rowCount === 0) {
+    const existingLead = await pool.query(
+      'SELECT id FROM leads WHERE id = $1',
+      [id],
+    );
+
+    if (existingLead.rowCount === 0) {
+      return { notFound: true };
+    }
+
+    return { conflict: true };
+  }
+
+  return getLeadById(id);
+};
