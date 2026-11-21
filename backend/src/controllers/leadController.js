@@ -6,7 +6,15 @@ import {
 
 export const getAllLeadsController = async (req, res, next) => {
   try {
-    const { sortBy = 'created_at', order = 'desc' } = req.query;
+    const {
+      status,
+      agentId,
+      search,
+      sortBy = 'created_at',
+      order = 'desc',
+      page = 1,
+      limit = 20,
+    } = req.query;
 
     const allowedSortFields = ['created_at', 'score'];
     const allowedOrders = ['asc', 'desc'];
@@ -25,7 +33,15 @@ export const getAllLeadsController = async (req, res, next) => {
       });
     }
 
-    const leads = await getAllLeads({ sortBy, order });
+    const leads = await getAllLeads({
+      status: status || null,
+      agentId: agentId || null,
+      search: search || null,
+      sortBy,
+      order,
+      page,
+      limit,
+    });
 
     res.status(200).json(leads);
   } catch (error) {
