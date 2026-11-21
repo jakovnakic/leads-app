@@ -6,7 +6,26 @@ import {
 
 export const getAllLeadsController = async (req, res, next) => {
   try {
-    const leads = await getAllLeads();
+    const { sortBy = 'created_at', order = 'desc' } = req.query;
+
+    const allowedSortFields = ['created_at', 'score'];
+    const allowedOrders = ['asc', 'desc'];
+
+    if (!allowedSortFields.includes(sortBy)) {
+      return res.status(400).json({
+        status: 'Error',
+        message: 'Invalid sortBy parameter. Allowed values: created_at, score.',
+      });
+    }
+
+    if (!allowedOrders.includes(order)) {
+      return res.status(400).json({
+        status: 'Error',
+        message: 'Invalid order parameter. Allowed values: asc, desc.',
+      });
+    }
+
+    const leads = await getAllLeads({ sortBy, order });
 
     res.status(200).json(leads);
   } catch (error) {
