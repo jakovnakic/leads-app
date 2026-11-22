@@ -1,0 +1,56 @@
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default spacing */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Root settings */
+html {
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+}
+
+/* Body defaults */
+body {
+  font-family: Arial, sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: #212121;
+  background-color: #f5f7fa;
+}
+
+/* Form elements inherit typography */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Images */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+}

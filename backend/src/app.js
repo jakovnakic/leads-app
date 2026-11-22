@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 import scoringConfigRoutes from './routes/scoringConfigRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
@@ -9,6 +10,12 @@ import notFound from './middleware/notFound.js';
 import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+  }),
+);
 
 app.use(express.json());
 

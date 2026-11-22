@@ -1,0 +1,66 @@
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &__horizontal-split {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  height: 7rem;
+  flex-shrink: 0;
+  padding: 2.5rem 3rem;
+  color: #fff;
+  background-color: #185e91;
+  border-bottom: 1px solid #e0e0e0;
+
+  &__brand {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+}
+
+.navigation {
+  width: 27rem;
+  flex-shrink: 0;
+  padding: 2.4rem 1.6rem;
+  background-color: #e5eef7;
+  border-right: 1px solid #e0e0e0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  &__nav-link {
+    display: block;
+    padding: 1.2rem 1.6rem;
+    border-radius: 0.8rem;
+    color: #185e91;
+    font-size: 1.4rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(&--active) {
+      background-color: rgba(164, 203, 231, 0.2);
+    }
+
+    &--active {
+      background-color: #a4cbe7;
+    }
+  }
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 3.2rem;
+  overflow-y: auto;
+}

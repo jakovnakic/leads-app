@@ -1,0 +1,45 @@
+.leads-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  &__title {
+    color: #185e91;
+    font-size: 2.4rem;
+    font-weight: 700;
+  }
+
+  &__description {
+    font-size: 1.4rem;
+  }
+}
+
+.filters-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  &__search {
+    max-width: 35rem;
+  }
+
+  &__filter {
+    width: 20rem;
+  }
+}
+
+.data-grid {
+  color: #333333;
+  font-size: 1.4rem;
+
+  :global(.MuiDataGrid-columnHeaderTitle) {
+    color: #185e91;
+    font-weight: 700;
+  }
+}
