@@ -19,6 +19,25 @@ const priorityLabels = {
   low: 'Baja',
 };
 
+const sortingOptions = {
+  created_at_desc: {
+    sortBy: 'created_at',
+    order: 'desc',
+  },
+  created_at_asc: {
+    sortBy: 'created_at',
+    order: 'asc',
+  },
+  score_desc: {
+    sortBy: 'score',
+    order: 'desc',
+  },
+  score_asc: {
+    sortBy: 'score',
+    order: 'asc',
+  },
+};
+
 const columns = [
   {
     field: 'name',
@@ -62,6 +81,9 @@ const initialState = {
   search: '',
   status: '',
   assignedAgentId: '',
+  page: 0,
+  pageSize: 10,
+  sortOption: '',
 };
 
 const leadsReducer = (state, action) => {
@@ -70,16 +92,41 @@ const leadsReducer = (state, action) => {
       return {
         ...state,
         search: action.payload,
+        page: 0,
       };
+
     case 'SET_STATUS_FILTER':
       return {
         ...state,
         status: action.payload,
+        page: 0,
       };
+
     case 'SET_AGENT_FILTER':
       return {
         ...state,
         assignedAgentId: action.payload,
+        page: 0,
+      };
+
+    case 'SET_PAGE':
+      return {
+        ...state,
+        page: action.payload,
+      };
+
+    case 'SET_PAGE_SIZE':
+      return {
+        ...state,
+        page: 0,
+        pageSize: action.payload,
+      };
+
+    case 'SET_SORT_OPTION':
+      return {
+        ...state,
+        sortOption: action.payload,
+        page: 0,
       };
 
     default:
@@ -89,12 +136,16 @@ const leadsReducer = (state, action) => {
 
 const LeadsPage = () => {
   const [state, dispatch] = useReducer(leadsReducer, initialState);
-  const { search, status, assignedAgentId } = state;
+  const { search, status, assignedAgentId, page, pageSize, sortOption } = state;
+  const sorting = sortingOptions[sortOption] ?? {};
 
   const { data, isLoading, isError, error } = useLeads({
     search: search,
     status: status,
     assignedAgentId: assignedAgentId,
+    page: page + 1,
+    pageSize: pageSize,
+    ...sorting,
   });
 
   const { data: agents = [] } = useAgents();
@@ -120,6 +171,27 @@ const LeadsPage = () => {
   const handleChangeAssignedAgent = (e) => {
     dispatch({
       type: 'SET_AGENT_FILTER',
+      payload: e.target.value,
+    });
+  };
+
+  const handlePaginationModelChange = (model) => {
+    if (model.pageSize !== pageSize) {
+      dispatch({
+        type: 'SET_PAGE_SIZE',
+        payload: model.pageSize,
+      });
+    } else {
+      dispatch({
+        type: 'SET_PAGE',
+        payload: model.page,
+      });
+    }
+  };
+
+  const handleChangeSortOption = (e) => {
+    dispatch({
+      type: 'SET_SORT_OPTION',
       payload: e.target.value,
     });
   };
@@ -172,6 +244,25 @@ const LeadsPage = () => {
               </MenuItem>
             ))}
           </TextField>
+
+          <TextField
+            select
+            label='Ordenar por'
+            value={sortOption}
+            onChange={handleChangeSortOption}
+            size='small'
+            className={styles['filters-group__sort-filter']}
+          >
+            <MenuItem value=''>Sin ordenar</MenuItem>
+            <MenuItem value='created_at_desc'>
+              Fecha de creación: más recientes
+            </MenuItem>
+            <MenuItem value='created_at_asc'>
+              Fecha de creación: más antiguos
+            </MenuItem>
+            <MenuItem value='score_desc'>Puntuación: mayor a menor</MenuItem>
+            <MenuItem value='score_asc'>Puntuación: menor a mayor</MenuItem>
+          </TextField>
         </div>
       </header>
 
@@ -180,16 +271,16 @@ const LeadsPage = () => {
         columns={columns}
         getRowId={(row) => row.id}
         loading={isLoading}
+        paginationMode='server'
+        rowCount={data?.pagination.total ?? 0}
         pageSizeOptions={[5, 10, 20]}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
-              page: 0,
-            },
-          },
+        paginationModel={{
+          page: page,
+          pageSize: pageSize,
         }}
+        onPaginationModelChange={handlePaginationModelChange}
         disableRowSelectionOnClick
+        disableColumnSorting
         className={styles['data-grid']}
       />
     </div>
