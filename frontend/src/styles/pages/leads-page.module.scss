@@ -20,6 +20,12 @@
   }
 }
 
+.buttons-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .filters-group {
   display: flex;
   align-items: center;

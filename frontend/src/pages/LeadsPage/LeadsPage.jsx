@@ -5,6 +5,8 @@ import { useReducer } from 'react';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import useAgents from '../../hooks/useAgents';
+import Button from '@mui/material/Button';
+import CreateLeadDialog from '../../components/leads/CreateLeadDialog';
 
 const statusLabels = {
   new: 'Nuevo',
@@ -84,6 +86,7 @@ const initialState = {
   page: 0,
   pageSize: 10,
   sortOption: '',
+  isCreateDialogOpen: false,
 };
 
 const leadsReducer = (state, action) => {
@@ -129,6 +132,18 @@ const leadsReducer = (state, action) => {
         page: 0,
       };
 
+    case 'OPEN_CREATE_DIALOG':
+      return {
+        ...state,
+        isCreateDialogOpen: true,
+      };
+
+    case 'CLOSE_CREATE_DIALOG':
+      return {
+        ...state,
+        isCreateDialogOpen: false,
+      };
+
     default:
       return state;
   }
@@ -136,7 +151,15 @@ const leadsReducer = (state, action) => {
 
 const LeadsPage = () => {
   const [state, dispatch] = useReducer(leadsReducer, initialState);
-  const { search, status, assignedAgentId, page, pageSize, sortOption } = state;
+  const {
+    search,
+    status,
+    assignedAgentId,
+    page,
+    pageSize,
+    sortOption,
+    isCreateDialogOpen,
+  } = state;
   const sorting = sortingOptions[sortOption] ?? {};
 
   const { data, isLoading, isError, error } = useLeads({
@@ -196,6 +219,14 @@ const LeadsPage = () => {
     });
   };
 
+  const handleOpenCreateDialog = () => {
+    dispatch({ type: 'OPEN_CREATE_DIALOG' });
+  };
+
+  const handleCloseCreateDialog = () => {
+    dispatch({ type: 'CLOSE_CREATE_DIALOG' });
+  };
+
   return (
     <div className={styles['leads-page']}>
       <header className={styles['header']}>
@@ -204,65 +235,70 @@ const LeadsPage = () => {
           Gestiona y consulta tus leads comerciales. Total:{' '}
           {data?.pagination.total ?? 0}
         </p>
-        <div className={styles['filters-group']}>
-          <TextField
-            label='Buscar lead'
-            placeholder='Nombre o teléfono'
-            value={search}
-            onChange={handleChangeSearch}
-            size='small'
-            className={styles['filters-group__search']}
-          />
+        <div className={styles['buttons-split']}>
+          <div className={styles['filters-group']}>
+            <TextField
+              label='Buscar lead'
+              placeholder='Nombre o teléfono'
+              value={search}
+              onChange={handleChangeSearch}
+              size='small'
+              className={styles['filters-group__search']}
+            />
 
-          <TextField
-            select
-            label='Estado'
-            value={status}
-            onChange={handleChangeStatus}
-            size='small'
-            className={styles['filters-group__filter']}
-          >
-            <MenuItem value=''>Todos</MenuItem>
-            <MenuItem value='new'>Nuevo</MenuItem>
-            <MenuItem value='in_progress'>En progreso</MenuItem>
-            <MenuItem value='contacted'>Contactado</MenuItem>
-            <MenuItem value='closed'>Cerrado</MenuItem>
-          </TextField>
+            <TextField
+              select
+              label='Estado'
+              value={status}
+              onChange={handleChangeStatus}
+              size='small'
+              className={styles['filters-group__filter']}
+            >
+              <MenuItem value=''>Todos</MenuItem>
+              <MenuItem value='new'>Nuevo</MenuItem>
+              <MenuItem value='in_progress'>En progreso</MenuItem>
+              <MenuItem value='contacted'>Contactado</MenuItem>
+              <MenuItem value='closed'>Cerrado</MenuItem>
+            </TextField>
 
-          <TextField
-            select
-            label='Agente asignado'
-            value={assignedAgentId}
-            onChange={handleChangeAssignedAgent}
-            size='small'
-            className={styles['filters-group__filter']}
-          >
-            <MenuItem value=''>Todos</MenuItem>
-            {agents.map((agent) => (
-              <MenuItem key={agent.id} value={agent.id}>
-                {agent.name}
+            <TextField
+              select
+              label='Agente asignado'
+              value={assignedAgentId}
+              onChange={handleChangeAssignedAgent}
+              size='small'
+              className={styles['filters-group__filter']}
+            >
+              <MenuItem value=''>Todos</MenuItem>
+              {agents.map((agent) => (
+                <MenuItem key={agent.id} value={agent.id}>
+                  {agent.name}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <TextField
+              select
+              label='Ordenar por'
+              value={sortOption}
+              onChange={handleChangeSortOption}
+              size='small'
+              className={styles['filters-group__sort-filter']}
+            >
+              <MenuItem value=''>Sin ordenar</MenuItem>
+              <MenuItem value='created_at_desc'>
+                Fecha de creación: más recientes
               </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            select
-            label='Ordenar por'
-            value={sortOption}
-            onChange={handleChangeSortOption}
-            size='small'
-            className={styles['filters-group__sort-filter']}
-          >
-            <MenuItem value=''>Sin ordenar</MenuItem>
-            <MenuItem value='created_at_desc'>
-              Fecha de creación: más recientes
-            </MenuItem>
-            <MenuItem value='created_at_asc'>
-              Fecha de creación: más antiguos
-            </MenuItem>
-            <MenuItem value='score_desc'>Puntuación: mayor a menor</MenuItem>
-            <MenuItem value='score_asc'>Puntuación: menor a mayor</MenuItem>
-          </TextField>
+              <MenuItem value='created_at_asc'>
+                Fecha de creación: más antiguos
+              </MenuItem>
+              <MenuItem value='score_desc'>Puntuación: mayor a menor</MenuItem>
+              <MenuItem value='score_asc'>Puntuación: menor a mayor</MenuItem>
+            </TextField>
+          </div>
+          <Button variant='contained' onClick={handleOpenCreateDialog}>
+            + Nuevo
+          </Button>
         </div>
       </header>
 
@@ -282,6 +318,11 @@ const LeadsPage = () => {
         disableRowSelectionOnClick
         disableColumnSorting
         className={styles['data-grid']}
+      />
+
+      <CreateLeadDialog
+        open={isCreateDialogOpen}
+        handleClose={handleCloseCreateDialog}
       />
     </div>
   );
