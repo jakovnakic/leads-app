@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import useAgents from '../../hooks/useAgents';
 import Button from '@mui/material/Button';
-import CreateLeadDialog from '../../components/leads/CreateLeadDialog';
+import LeadDialog from '../../components/leads/LeadDialog';
 
 const statusLabels = {
   new: 'Nuevo',
@@ -40,45 +40,6 @@ const sortingOptions = {
   },
 };
 
-const columns = [
-  {
-    field: 'name',
-    headerName: 'Nombre',
-    flex: 1.5,
-    minWidth: 180,
-  },
-  {
-    field: 'phone',
-    headerName: 'Teléfono',
-    flex: 1,
-    minWidth: 150,
-  },
-  {
-    field: 'status',
-    headerName: 'Estado',
-    flex: 1,
-    minWidth: 130,
-    renderCell: (params) => statusLabels[params.value],
-  },
-  {
-    field: 'assigned_agent_name',
-    headerName: 'Agente asignado',
-    flex: 1.2,
-    minWidth: 160,
-    renderCell: (params) => params.value || '-',
-  },
-  {
-    field: 'score',
-    headerName: 'Score',
-    width: 120,
-    renderCell: (params) => (
-      <span>
-        {params.row.score} / {priorityLabels[params.row.priority]}
-      </span>
-    ),
-  },
-];
-
 const initialState = {
   search: '',
   status: '',
@@ -86,7 +47,8 @@ const initialState = {
   page: 0,
   pageSize: 10,
   sortOption: '',
-  isCreateDialogOpen: false,
+  isDialogOpen: false,
+  selectedLead: null,
 };
 
 const leadsReducer = (state, action) => {
@@ -135,13 +97,21 @@ const leadsReducer = (state, action) => {
     case 'OPEN_CREATE_DIALOG':
       return {
         ...state,
-        isCreateDialogOpen: true,
+        isDialogOpen: true,
+        selectedLead: null,
       };
 
-    case 'CLOSE_CREATE_DIALOG':
+    case 'OPEN_EDIT_DIALOG':
       return {
         ...state,
-        isCreateDialogOpen: false,
+        isDialogOpen: true,
+        selectedLead: action.payload,
+      };
+
+    case 'CLOSE_DIALOG':
+      return {
+        ...state,
+        isDialogOpen: false,
       };
 
     default:
@@ -158,7 +128,8 @@ const LeadsPage = () => {
     page,
     pageSize,
     sortOption,
-    isCreateDialogOpen,
+    isDialogOpen,
+    selectedLead,
   } = state;
   const sorting = sortingOptions[sortOption] ?? {};
 
@@ -223,9 +194,69 @@ const LeadsPage = () => {
     dispatch({ type: 'OPEN_CREATE_DIALOG' });
   };
 
-  const handleCloseCreateDialog = () => {
-    dispatch({ type: 'CLOSE_CREATE_DIALOG' });
+  const handleOpenEditDialog = (lead) => {
+    console.log(lead);
+    dispatch({ type: 'OPEN_EDIT_DIALOG', payload: lead });
   };
+
+  const handleCloseDialog = () => {
+    dispatch({ type: 'CLOSE_DIALOG' });
+  };
+
+  const columns = [
+    {
+      field: 'name',
+      headerName: 'Nombre',
+      flex: 1.5,
+      minWidth: 180,
+    },
+    {
+      field: 'phone',
+      headerName: 'Teléfono',
+      flex: 1,
+      minWidth: 150,
+    },
+    {
+      field: 'status',
+      headerName: 'Estado',
+      flex: 1,
+      minWidth: 130,
+      renderCell: (params) => statusLabels[params.value],
+    },
+    {
+      field: 'assigned_agent_name',
+      headerName: 'Agente asignado',
+      flex: 1.2,
+      minWidth: 160,
+      renderCell: (params) => params.value || '-',
+    },
+    {
+      field: 'score',
+      headerName: 'Score',
+      width: 120,
+      renderCell: (params) => (
+        <span>
+          {params.row.score} / {priorityLabels[params.row.priority]}
+        </span>
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Acción',
+      sortable: false,
+      filterable: false,
+      width: 120,
+      renderCell: (params) => (
+        <Button
+          size='small'
+          variant='outlined'
+          onClick={() => handleOpenEditDialog(params.row)}
+        >
+          Ver
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className={styles['leads-page']}>
@@ -320,9 +351,10 @@ const LeadsPage = () => {
         className={styles['data-grid']}
       />
 
-      <CreateLeadDialog
-        open={isCreateDialogOpen}
-        handleClose={handleCloseCreateDialog}
+      <LeadDialog
+        open={isDialogOpen}
+        lead={selectedLead}
+        handleClose={handleCloseDialog}
       />
     </div>
   );

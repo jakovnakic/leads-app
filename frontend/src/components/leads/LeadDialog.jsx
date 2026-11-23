@@ -4,6 +4,7 @@ import { TextField, MenuItem, Button, Alert, Dialog } from '@mui/material';
 import useAgents from '../../hooks/useAgents';
 import useScoringConfig from '../../hooks/useScoringConfig';
 import useCreateLead from '../../hooks/useCreateLead';
+import useUpdateLead from '../../hooks/useUpdateLead';
 import styles from '../../styles/components/create-lead-dialog.module.scss';
 
 const initialFormData = {
@@ -24,6 +25,11 @@ const formReducer = (state, action) => {
         [action.field]: action.value,
       };
 
+    case 'SET_FORM':
+      return {
+        ...action.payload,
+      };
+
     case 'RESET':
       return initialFormData;
 
@@ -32,8 +38,10 @@ const formReducer = (state, action) => {
   }
 };
 
-const CreateLeadDialog = ({ open, handleClose }) => {
+const LeadDialog = ({ open, lead = null, handleClose }) => {
   const [formData, dispatch] = useReducer(formReducer, initialFormData);
+
+  const isEditMode = Boolean(lead);
 
   const {
     data: agents = [],
@@ -48,6 +56,9 @@ const CreateLeadDialog = ({ open, handleClose }) => {
   } = useScoringConfig();
 
   const createLeadMutation = useCreateLead();
+  const updateLeadMutation = useUpdateLead();
+
+  const activeMutation = isEditMode ? updateLeadMutation : createLeadMutation;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -59,31 +70,62 @@ const CreateLeadDialog = ({ open, handleClose }) => {
     });
   };
 
-  const handleCreateNewLead = () => {
+  const handleSubmit = () => {
     const leadData = {
       ...formData,
       assigned_agent_id: formData.assigned_agent_id || null,
       is_new_customer: formData.is_new_customer === 'true',
     };
 
-    createLeadMutation.mutate(leadData, {
-      onSuccess: () => {
-        handleClose();
-      },
-    });
+    if (isEditMode) {
+      updateLeadMutation.mutate(
+        {
+          id: lead.id,
+          leadData: {
+            ...leadData,
+            version: lead.version,
+          },
+        },
+        {
+          onSuccess: handleClose,
+        },
+      );
+    } else {
+      createLeadMutation.mutate(leadData, {
+        onSuccess: handleClose,
+      });
+    }
   };
 
   useEffect(() => {
     if (open) {
-      dispatch({ type: 'RESET' });
+      if (lead) {
+        dispatch({
+          type: 'SET_FORM',
+          payload: {
+            name: lead.name ?? '',
+            phone: lead.phone ?? '',
+            status: lead.status ?? 'new',
+            assigned_agent_id: lead.assigned_agent_id ?? '',
+            is_new_customer: String(lead.is_new_customer),
+            commercial_interest_option_id:
+              lead.commercial_interest_option_id ?? '',
+            lead_source_option_id: lead.lead_source_option_id ?? '',
+          },
+        });
+      } else {
+        dispatch({ type: 'RESET' });
+      }
+
       createLeadMutation.reset();
+      updateLeadMutation.reset();
     }
   }, [open]);
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      {createLeadMutation.isError && (
-        <Alert severity='error'>{createLeadMutation.error.message}</Alert>
+      {activeMutation.isError && (
+        <Alert severity='error'>{activeMutation.error.message}</Alert>
       )}
 
       {(isAgentsError || isScoringConfigError) && (
@@ -91,8 +133,12 @@ const CreateLeadDialog = ({ open, handleClose }) => {
           No se pudieron cargar los datos del formulario.
         </Alert>
       )}
+
       <div className={styles['dialog']}>
-        <h1 className={styles['heading']}>Nuevo lead</h1>
+        <h1 className={styles['heading']}>
+          {isEditMode ? 'Editar lead' : 'Nuevo lead'}
+        </h1>
+
         <main className={styles['main']}>
           <TextField
             name='name'
@@ -194,7 +240,7 @@ const CreateLeadDialog = ({ open, handleClose }) => {
           <Button onClick={handleClose}>Cancelar</Button>
 
           <Button
-            onClick={handleCreateNewLead}
+            onClick={handleSubmit}
             variant='contained'
             disabled={
               !formData.name.trim() ||
@@ -205,7 +251,7 @@ const CreateLeadDialog = ({ open, handleClose }) => {
               !formData.lead_source_option_id
             }
           >
-            Crear lead
+            {isEditMode ? 'Editar lead' : 'Crear lead'}
           </Button>
         </footer>
       </div>
@@ -213,4 +259,4 @@ const CreateLeadDialog = ({ open, handleClose }) => {
   );
 };
 
-export default CreateLeadDialog;
+export default LeadDialog;
