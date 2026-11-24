@@ -23,14 +23,15 @@ export const getAllLeadsController = async (req, res, next) => {
     if (!allowedSortFields.includes(sortBy)) {
       return res.status(400).json({
         status: 'Error',
-        message: 'Invalid sortBy parameter. Allowed values: created_at, score.',
+        message:
+          'Parámetro sortBy no válido. Valores permitidos: created_at, score.',
       });
     }
 
     if (!allowedOrders.includes(order)) {
       return res.status(400).json({
         status: 'Error',
-        message: 'Invalid order parameter. Allowed values: asc, desc.',
+        message: 'Parámetro order no válido. Valores permitidos: asc, desc.',
       });
     }
 
@@ -59,7 +60,7 @@ export const getLeadByIdController = async (req, res, next) => {
     if (!lead) {
       return res.status(404).json({
         status: 'Error',
-        message: 'Lead not found',
+        message: 'No se ha encontrado el lead.',
       });
     }
 
@@ -88,7 +89,7 @@ export const updateLeadController = async (req, res, next) => {
     if (result.notFound) {
       return res.status(404).json({
         status: 'Error',
-        message: 'Lead not found',
+        message: 'No se ha encontrado el lead.',
       });
     }
 
@@ -96,7 +97,7 @@ export const updateLeadController = async (req, res, next) => {
       return res.status(409).json({
         status: 'Error',
         message:
-          'Lead has been modified by another user. Please refresh and try again.',
+          'El lead ha sido modificado por otro usuario. Por favor, actualiza la página e inténtalo de nuevo.',
       });
     }
 

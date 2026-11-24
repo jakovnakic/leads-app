@@ -17,21 +17,21 @@ const validateLead = (req, res, next) => {
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Name is required',
+      message: 'El nombre es obligatorio',
     });
   }
 
   if (typeof phone !== 'string' || !phone.trim()) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Phone is required',
+      message: 'El teléfono es obligatorio',
     });
   }
 
   if (!VALID_STATUSES.includes(status)) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Invalid lead status',
+      message: 'Estado del lead no válido',
     });
   }
 
@@ -42,14 +42,14 @@ const validateLead = (req, res, next) => {
   ) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Invalid assigned agent ID',
+      message: 'ID de agente asignado no válido',
     });
   }
 
   if (typeof is_new_customer !== 'boolean') {
     return res.status(400).json({
       status: 'Error',
-      message: 'New customer value must be a boolean',
+      message: 'El valor de cliente nuevo debe ser un booleano',
     });
   }
 
@@ -59,7 +59,7 @@ const validateLead = (req, res, next) => {
   ) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Invalid commercial interest option ID',
+      message: 'ID de la opción de interés comercial no válido',
     });
   }
 
@@ -69,7 +69,7 @@ const validateLead = (req, res, next) => {
   ) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Invalid lead source option ID',
+      message: 'ID de la opción de origen del lead no válido',
     });
   }
 

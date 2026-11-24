@@ -7,7 +7,7 @@ const validateUuid = (req, res, next) => {
   if (!UUID_REGEX.test(id)) {
     return res.status(400).json({
       status: 'Error',
-      message: 'Invalid lead ID',
+      message: 'ID del lead no válido',
     });
   }
 

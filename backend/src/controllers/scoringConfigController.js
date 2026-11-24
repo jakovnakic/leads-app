@@ -21,7 +21,7 @@ export const updateScoringConfigController = async (req, res, next) => {
       return res.status(409).json({
         status: 'Error',
         message:
-          'Scoring configuration has been modified by another user. Please refresh and try again.',
+          'La configuración de puntuación ha sido modificada por otro usuario. Por favor, actualiza la página e inténtalo de nuevo.',
       });
     }
 
