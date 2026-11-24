@@ -88,7 +88,7 @@ Open a second terminal window:
 cd frontend
 
 # Windows (Command Prompt)
-copy .env.example .
+copy .env.example .env
 
 # macOS / Linux
 cp .env.example .env
