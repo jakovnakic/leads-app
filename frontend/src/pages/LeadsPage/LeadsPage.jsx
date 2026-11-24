@@ -261,7 +261,7 @@ const LeadsPage = () => {
   return (
     <div className={styles['leads-page']}>
       <header className={styles['header']}>
-        <h1 className={styles['header__title']}>Leads</h1>
+        <h1 className={styles['header__title']}>CRM / Leads comerciales</h1>
         <p className={styles['header__description']}>
           Gestiona y consulta tus leads comerciales. Total:{' '}
           {data?.pagination.total ?? 0}

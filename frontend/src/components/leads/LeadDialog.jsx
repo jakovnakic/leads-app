@@ -5,7 +5,8 @@ import useAgents from '../../hooks/useAgents';
 import useScoringConfig from '../../hooks/useScoringConfig';
 import useCreateLead from '../../hooks/useCreateLead';
 import useUpdateLead from '../../hooks/useUpdateLead';
-import styles from '../../styles/components/create-lead-dialog.module.scss';
+import styles from '../../styles/components/lead-dialog.module.scss';
+import { DataGrid } from '@mui/x-data-grid';
 
 const initialFormData = {
   name: '',
@@ -122,6 +123,72 @@ const LeadDialog = ({ open, lead = null, handleClose }) => {
     }
   }, [open]);
 
+  const columns = [
+    {
+      field: 'criterion',
+      headerName: 'Criterio',
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => (
+        <TextField
+          select
+          name={params.row.id}
+          label={params.row.label}
+          value={params.row.value}
+          onChange={handleChange}
+          fullWidth
+          size='small'
+        >
+          {(params.row.options ?? []).map((option) => (
+            <MenuItem key={option.id} value={option.id}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+      ),
+    },
+    {
+      field: 'rating',
+      headerName: 'Valoración',
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => `${params.row.rating} / 100`,
+    },
+  ];
+
+  const rows = [
+    {
+      id: 'is_new_customer',
+      label: '¿Es cliente nuevo?',
+      value: formData.is_new_customer,
+      options: [
+        { id: 'true', label: 'Sí', rating: 100 },
+        { id: 'false', label: 'No', rating: 0 },
+      ],
+      rating: formData.is_new_customer === 'true' ? 100 : 0,
+    },
+    {
+      id: 'commercial_interest_option_id',
+      label: 'Interés comercial',
+      value: formData.commercial_interest_option_id,
+      options: scoringConfig?.commercialInterestOptions,
+      rating:
+        scoringConfig?.commercialInterestOptions?.find(
+          (option) => option.id === formData.commercial_interest_option_id,
+        )?.rating ?? 0,
+    },
+    {
+      id: 'lead_source_option_id',
+      label: 'Origen del lead',
+      value: formData.lead_source_option_id,
+      options: scoringConfig?.leadSourceOptions,
+      rating:
+        scoringConfig?.leadSourceOptions?.find(
+          (option) => option.id === formData.lead_source_option_id,
+        )?.rating ?? 0,
+    },
+  ];
+
   return (
     <Dialog open={open} onClose={handleClose}>
       {activeMutation.isError && (
@@ -190,50 +257,49 @@ const LeadDialog = ({ open, lead = null, handleClose }) => {
             ))}
           </TextField>
 
-          <TextField
-            select
-            name='is_new_customer'
-            label='¿Es cliente nuevo?'
-            value={formData.is_new_customer}
-            onChange={handleChange}
-            fullWidth
-            size='small'
-          >
-            <MenuItem value='true'>Sí</MenuItem>
-            <MenuItem value='false'>No</MenuItem>
-          </TextField>
+          <DataGrid
+            columns={columns}
+            rows={rows}
+            hideFooter
+            disableRowSelectionOnClick
+            rowHeight={60}
+            className={styles['data-grid']}
+          />
 
-          <TextField
-            select
-            name='commercial_interest_option_id'
-            label='Interés comercial'
-            value={formData.commercial_interest_option_id}
-            onChange={handleChange}
-            fullWidth
-            size='small'
-          >
-            {scoringConfig?.commercialInterestOptions?.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
+          <p>
+            Fecha:{' '}
+            {new Date(lead ? lead.created_at : new Date()).toLocaleDateString(
+              'es-ES',
+            )}
+            , {lead ? lead.age_in_days : 0} días de antigüedad,{' '}
+            {lead ? lead.age_rating : 100} puntos
+          </p>
 
-          <TextField
-            select
-            name='lead_source_option_id'
-            label='Origen del lead'
-            value={formData.lead_source_option_id}
-            onChange={handleChange}
-            fullWidth
-            size='small'
-          >
-            {scoringConfig?.leadSourceOptions?.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
+          <p>
+            <span className={styles['total']}>Total:</span> ({rows[0].rating}
+            [Cliente nuevo] × {
+              scoringConfig?.weights?.new_customer_weight
+            } + {rows[1].rating}
+            [Interés comercial] ×{' '}
+            {scoringConfig?.weights?.commercial_interest_weight} +{' '}
+            {rows[2].rating}[Origen del lead] ×{' '}
+            {scoringConfig?.weights?.lead_source_weight} +{' '}
+            {lead ? lead.age_rating : 100}[Antigüedad] ×{' '}
+            {scoringConfig?.weights?.age_weight}) / 100 ={' '}
+            {(rows[0].rating * scoringConfig?.weights?.new_customer_weight +
+              rows[1].rating *
+                scoringConfig?.weights?.commercial_interest_weight +
+              rows[2].rating * scoringConfig?.weights?.lead_source_weight +
+              (lead ? lead.age_rating : 100) *
+                scoringConfig?.weights?.age_weight) /
+              100}{' '}
+            puntos
+          </p>
+
+          <p className={styles['calculation-note']}>
+            Este cálculo es meramente informativo. La puntuación definitiva se
+            calcula y valida en el backend.
+          </p>
         </main>
 
         <footer className={styles['footer']}>

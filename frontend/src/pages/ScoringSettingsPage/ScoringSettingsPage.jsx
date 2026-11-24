@@ -168,7 +168,9 @@ const ScoringSettingsPage = () => {
   return (
     <div className={styles['scoring-settings-page']}>
       <header className={styles['header']}>
-        <h1 className={styles['header__title']}>Configuración de pesos</h1>
+        <h1 className={styles['header__title']}>
+          Configuración de pesos / Administración
+        </h1>
         <p className={styles['header__description']}>
           Ajusta el peso de cada criterio para determinar su importancia en la
           puntuación final de los leads.
