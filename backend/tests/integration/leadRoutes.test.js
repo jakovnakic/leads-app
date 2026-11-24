@@ -66,6 +66,6 @@ describe('Lead API integration tests', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.status).toBe('Error');
-    expect(response.body.message).toBe('Name is required');
+    expect(response.body.message).toBe('El nombre es obligatorio');
   });
 });
