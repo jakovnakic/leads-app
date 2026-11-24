@@ -26,8 +26,6 @@ A full-stack application for managing commercial leads, assigning them to sales 
 
 - Jest
 - Supertest
-- Vitest
-- React Testing Library
 
 ## Getting Started
 
@@ -46,7 +44,12 @@ Navigate to the backend directory and create your environment file:
 
 ```bash
 cd backend
+
+# Windows (Command Prompt)
 copy .env.example .env
+
+# macOS / Linux
+cp .env.example .env
 ```
 
 Update the environment variables in `.env`:
@@ -83,6 +86,13 @@ Open a second terminal window:
 
 ```bash
 cd frontend
+
+# Windows (Command Prompt)
+copy .env.example .
+
+# macOS / Linux
+cp .env.example .env
+
 npm install
 npm run dev
 ```
@@ -134,6 +144,8 @@ Each lead receives a score between 0 and 100 based on four criteria. Each criter
 | Lead source         |            20% |
 | Age                 |            10% |
 | **Total**           |       **100%** |
+
+These are the default weights used when the database is initially seeded. They can be modified through the application's scoring configuration page.
 
 ### Rating Rules
 
